@@ -1,20 +1,13 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Layout, Text, Button } from '@ui-kitten/components';
 
-export default function ProfileScreen() {
-  return (
-    <View style={styles.screenContainer}>
-      <Text>Profile Screen</Text>
-    </View>
-  );
-}
+ 
 
-const styles = StyleSheet.create({
-  screenContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-});
+const ProfileScreen = () => (
+  <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text category='h1'>Bienvenido</Text>
+    <Button onPress={() => alert('Hello!')}>Saludar</Button>
+  </Layout>
+);
+
+export default ProfileScreen;

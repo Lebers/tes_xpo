@@ -1,10 +1,9 @@
-// NotificationsScreen.js
-
+// BlankScreen.js
 import React from 'react';
 import { View, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const NotificationsScreen = () => {
+const BlankScreen = () => {
   const navigation = useNavigation();
 
   return (
@@ -14,5 +13,4 @@ const NotificationsScreen = () => {
   );
 };
 
-export default NotificationsScreen;
- 
+export default BlankScreen;
