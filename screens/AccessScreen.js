@@ -1,8 +1,9 @@
+//AccessScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
-const HomeScreen = () => {
+const AccessScreen = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -80,6 +81,9 @@ const styles = StyleSheet.create({
   title: { 
     fontWeight: 'bold',
   },
+
+  
 });
 
-export default HomeScreen;
+export default AccessScreen;
+
