@@ -1,95 +1,101 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, RefreshControl, Animated } from 'react-native';
 import { Card } from 'react-native-elements';
-
-const notifications = [
-    { 
-      title: '¡AVISO IMPORTANTE!', 
-      imageUrl: '', 
-      description: 'EL VIERNES 5 DE ABRIL, ES EL ÚLTIMO DÍA DE PAGO DE COLEGIATURA Y RENTA DE IPAD, SIN GENERAR RECARGOS.', 
-      footer: 'DEPARTAMENTO DE CONTABILIDAD',
-      date: '02/04/2023'
-    },
-    { 
-      title: '¡RECORDATORIO DE EVENTO!', 
-    
-      description: 'NO OLVIDES LA REUNIÓN GENERAL ESTE LUNES 8 DE ABRIL A LAS 10:00 AM EN EL AUDITORIO.', 
-      footer: 'DEPARTAMENTO DE RECURSOS HUMANOS',
-      date: '02/04/2023'
-    },
-    { 
-      title: '¡NUEVO SERVICIO!', 
-      imageUrl: 'https://img.freepik.com/vector-gratis/coleccion-disfraces-halloween-dibujados-mano_23-2149111458.jpg?w=740&t=st=1712643290~exp=1712643890~hmac=1070aa10de92da3845e5734a9644a386ae1d53bce3847b900ff5c1a07a2f53c5', 
-      description: 'YA PUEDES DESCARGAR TU FACTURA ELECTRÓNICA A TRAVÉS DE NUESTRA PLATAFORMA EN LÍNEA.', 
-      footer: 'SERVICIO AL CLIENTE',
-      date: '02/04/2023'
-    },
-    { 
-      title: '¡CAMBIO DE HORARIO!', 
-      imageUrl: 'https://img.freepik.com/vector-premium/ejemplo-lindo-historieta-juego-zombi-frankenstein-concepto-icono-juegos-halloween_138676-1890.jpg?w=740', 
-      description: 'A PARTIR DEL 15 DE ABRIL, EL HORARIO DE ATENCIÓN AL PÚBLICO SERÁ DE 8:00 AM A 4:00 PM.', 
-      footer: 'ADMINISTRACIÓN',
-      date: '02/04/2023'
-    },
-    { 
-      title: '¡MANTENIMIENTO PROGRAMADO!', 
-      imageUrl: 'https://img.freepik.com/fotos-premium/foto-3d-dibujos-animados-esqueleto-personaje-generativo-ai_742418-5312.jpg?w=740', 
-      description: 'HABRÁ UNA PAUSA EN EL SISTEMA DE MATRÍCULAS ESTE SÁBADO 13 DE ABRIL POR MANTENIMIENTO.', 
-      footer: 'DEPARTAMENTO TÉCNICO',
-      date: '02/04/2023'
-    },
-    { 
-      title: '¡INSCRIPCIONES ABIERTAS!', 
-      imageUrl: 'https://as1.ftcdn.net/v2/jpg/07/34/11/10/1000_F_734111073_5IiEDCU6lUoEkfMapuOpEM9XN61GjQOi.jpg', 
-      description: 'LOS CURSOS DE VERANO YA ESTÁN DISPONIBLES PARA INSCRIPCIÓN. ¡ASEGURA TU LUGAR!', 
-      footer: 'COORDINACIÓN ACADÉMICA',
-      date: '02/04/2023'
-    },
-    { 
-      title: '¡OFERTA LABORAL!', 
-      imageUrl: 'https://img.freepik.com/vector-gratis/gran-inauguracion_23-2148157034.jpg?w=826&t=st=1712643412~exp=1712644012~hmac=2a1357eaa71de83cde2d4ce835ab004a6e80be35323a5fb29e72d58202af4ff1', 
-      description: 'BUSCAMOS DESARROLLADORES DE SOFTWARE. ENVÍA TU CV Y PORTAFOLIO A TRABAJA@NUESTRAEMPRESA.COM.', 
-      footer: 'DEPARTAMENTO DE DESARROLLO',
-      date: '02/04/2023'
-    },
-    { 
-      title: '¡ACTUALIZACIÓN DE POLÍTICAS!', 
-      imageUrl: 'https://img.freepik.com/vector-gratis/letrero-cerrado-rojo-colgado-realista_23-2148887278.jpg?w=740', 
-      description: 'CONSULTA LAS NUEVAS POLÍTICAS DE PRIVACIDAD QUE ENTRAN EN VIGENCIA EL PRÓXIMO MES.', 
-      footer: 'DEPARTAMENTO LEGAL',
-      date: '02/04/2023'
-    }
-  ];
+import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  // Nuevo estado para controlar la visibilidad del encabezado
+  const [headerVisible, setHeaderVisible] = useState(true);
 
-  const handleCardPress = (notification) => {
-    setSelectedNotification(notification);
-    setModalVisible(true);
+  const navigation = useNavigation();
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://vigotskyqa.ajolotecode.com/cards');
+      const jsonData = await response.json();
+      setData(jsonData.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoading(true);
+      fetchData();
+    }, [])
+  );
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchData().then(() => setRefreshing(false));
+  }, []);
+
+  const scrollY = new Animated.Value(0);
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    {
+      listener: (event) => {
+        const currentScrollPosition = event.nativeEvent.contentOffset.y;
+        if (currentScrollPosition > 150 && headerVisible) {
+          // Ocultar el encabezado
+          setHeaderVisible(false);
+          navigation.setOptions({ headerShown: false });
+        } 
+        
+        if (currentScrollPosition  <= 20) {
+          // Mostrar el encabezado
+          setHeaderVisible(true);
+          navigation.setOptions({ headerShown: true });
+        }
+      },
+      useNativeDriver: false,
+    }
+  );
+
+  const renderItem = ({ item }) => (
+    <Card containerStyle={styles.card}>
+      <View style={styles.cardContent}>
+        {item.imageUrl ? <Card.Image source={{ uri: item.imageUrl }} /> : null}
+        <Card.Title style={styles.cardTitle}>{item.title}</Card.Title>
+        <Text style={styles.cardDescription}>{item.description}</Text>
+        <Text style={styles.cardFooter}>{item.footer}</Text>
+        <Text style={styles.dateText}>{item.date}</Text>
+      </View>
+    </Card>
+  );
+
   return (
-    <View style={styles.screenContainer}>
-      <ScrollView>
-        {notifications.map((notification, index) => (
-          <Card key={index} containerStyle={styles.card}>
-            <View style={styles.cardContent}>
-              {notification.imageUrl ? (
-                <Card.Image source={{ uri: notification.imageUrl }} />
-              ) : null}
-              <Card.Title style={styles.cardTitle}>{notification.title}</Card.Title>
-              <Text style={styles.cardDescription}>{notification.description}</Text>
-              <Text style={styles.cardFooter}>{notification.footer}</Text>
-            </View>
-            <Text style={styles.dateText}>{notification.date}</Text>
-          </Card>
-        ))}
-      </ScrollView>
+    <View style={{ flex: 1 }}>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <Animated.FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        />
+      )}
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   screenContainer: {

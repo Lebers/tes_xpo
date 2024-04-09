@@ -10,12 +10,16 @@ const AccessScreen = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://34.222.123.222/serigraft_api/rfids');
+      const response = await fetch('http://vigotskyqa.ajolotecode.com/rfids');
+      console.log("www");
       const jsonData = await response.json();
       setData(jsonData.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
+      if (error.message) {
+        console.error('Error message:', error.message);
+      }
       setLoading(false);
     }
   };
